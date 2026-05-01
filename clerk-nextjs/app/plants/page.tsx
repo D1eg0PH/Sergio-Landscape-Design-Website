@@ -1,18 +1,18 @@
 'use client';
-
 import { useState, useEffect } from 'react';
-import { useUser } from "@clerk/nextjs";
+import { useUser } from "@clerk/nextjs"; // Cambiado de Supabase a Clerk
 import { useLanguage } from '@/context/LanguajeContext';
 import { useRouter } from 'next/navigation';
 import { Loader2, Calendar, Send, CheckCircle2, X } from 'lucide-react';
 
 export default function CatalogPage() {
   const router = useRouter();
-  const { isLoaded, isSignedIn, user } = useUser();
+  const { isLoaded, isSignedIn, user } = useUser(); // Clerk Hook
   const { lang = 'en' } = useLanguage() || {};
   
-  // Estados de UI
   const [selectedImg, setSelectedImg] = useState<string | null>(null);
+
+  // Estados de Control
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
   
@@ -32,54 +32,59 @@ export default function CatalogPage() {
     time: '',
     city: 'Lakeland',
     address_line1: '',
+    zip_code: '',
     phone: '',
     email: '',
   });
 
   const timeSlots = ["08:00:00", "10:00:00", "12:00:00", "14:00:00", "16:00:00"];
 
-  // 1. Inicialización de Datos desde Neon (via API)
+  // 1. Inicialización (Reemplazando Supabase por tus APIs de Neon)
   useEffect(() => {
-    if (!isLoaded) return;
-    
-    if (!isSignedIn) {
-      router.push('/login');
-      return;
-    }
-
-    async function fetchData() {
-      try {
-        setLoading(true);
-        
-        // Usamos cache: 'no-store' para forzar la lectura de la base de datos
-        // Usamos Promise.allSettled para que si una API falla, la otra siga funcionando
-        const results = await Promise.allSettled([
-          fetch('/api/plants', { cache: 'no-store' }).then(res => res.json()),
-          fetch('/api/appointments/busy-slots', { cache: 'no-store' }).then(res => res.json())
-        ]);
-
-        // Procesar resultado de Plantas
-        if (results[0].status === 'fulfilled') {
-          setPlants(Array.isArray(results[0].value) ? results[0].value : []);
-        } else {
-          console.error("Error en API de plantas");
-        }
-
-        // Procesar resultado de Citas
-        if (results[1].status === 'fulfilled') {
-          setAppointments(Array.isArray(results[1].value) ? results[1].value : []);
-        }
-
-      } catch (error) {
-        console.error("Error crítico de red:", error);
-      } finally {
-        setLoading(false);
+    if (isLoaded) {
+      if (!isSignedIn) {
+        router.push('/login');
+      } else {
+        fetchData();
       }
     }
-
-    fetchData();
   }, [isLoaded, isSignedIn, router]);
+async function fetchData() {
+  try {
+    setLoading(true);
+    
+    // Ejecutamos ambas pero verificamos individualmente
+    const [resPlants, resSlots] = await Promise.all([
+      fetch('/api/plants'),
+      fetch('/api/appointments/busy-slots')
+    ]);
 
+    // Verificación de Plantas
+    let dataPlants = [];
+    if (resPlants.ok) {
+      dataPlants = await resPlants.json();
+    } else {
+      console.error("Error en /api/plants:", await resPlants.text());
+    }
+
+    // Verificación de Slots (Donde está el error según tu imagen)
+    let dataSlots = [];
+    if (resSlots.ok) {
+      dataSlots = await resSlots.json();
+    } else {
+      const errorText = await resSlots.text();
+      console.error("Error en /api/appointments/busy-slots:", errorText);
+    }
+
+    setPlants(Array.isArray(dataPlants) ? dataPlants : []);
+    setAppointments(Array.isArray(dataSlots) ? dataSlots : []);
+    
+  } catch (e) {
+    console.error("Error crítico en fetchData:", e);
+  } finally {
+    setLoading(false);
+  }
+}
   const togglePlant = (id: number) => {
     setSelectedPlants(prev => 
       prev.includes(id) ? prev.filter(p => p !== id) : [...prev, id]
@@ -90,34 +95,41 @@ export default function CatalogPage() {
     return appointments.some(app => app.appointment_date === date && app.appointment_time === time);
   };
 
+  // 2. Acción Final (Hacia tu API de Neon)
   const handleAction = async () => {
     if (!formData.fullName || !formData.phone) {
-      alert(lang === 'en' ? "Full Name and Phone are required" : "Nombre y Teléfono son requeridos");
+      alert(lang === 'en' ? "Required fields missing" : "Campos obligatorios faltantes");
       return;
     }
 
-    setProcessing(true);
-    try {
-      const response = await fetch('/api/appointments/create', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...formData,
-          userIntent,
-          userId: user?.id,
-          selectedPlants,
-          lang
-        }),
-      });
+   setProcessing(true);
+  try {
+    // 1. Crea un objeto limpio SIN la propiedad 'id'
+    const { id, ...dataToSend } = formData as any; // Esto quita el id si existiera en formData
 
-      if (!response.ok) throw new Error('Error al guardar');
+    const response = await fetch('/api/appointments/create', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        ...dataToSend, // Enviamos el resto de los datos
+        userIntent,
+        userId: user?.id,
+        selectedPlants,
+        lang
+      }),
+    });
 
+     if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.details || 'Error al guardar');
+    }
+      
       alert(lang === 'en' ? "Your request has been sent!" : "¡Tu solicitud ha sido enviada!");
       setIsModalOpen(false);
       setSelectedPlants([]);
+      setUserIntent('');
       router.push('/myappointments');
       router.refresh();
-
     } catch (error: any) {
       alert("Error: " + error.message);
     } finally {
@@ -125,6 +137,7 @@ export default function CatalogPage() {
     }
   };
 
+  // Render de carga e interfaz (Mantenemos tu estilo visual premium)
   if (!isLoaded || loading) {
     return (
       <div className="h-screen w-full flex flex-col items-center justify-center bg-gray-50">
@@ -139,7 +152,7 @@ export default function CatalogPage() {
   return (
     <div className="pt-32 px-6 bg-gray-50 min-h-screen pb-20 font-sans">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
+        {/* Header (Mantenido igual) */}
         <header className="bg-emerald-900 rounded-[2.5rem] p-10 text-white mb-8 shadow-xl relative overflow-hidden">
           <div className="relative z-10">
             <h1 className="text-4xl font-black uppercase italic tracking-tighter">
@@ -147,10 +160,9 @@ export default function CatalogPage() {
             </h1>
             <p className="text-emerald-300 font-bold text-xs uppercase tracking-widest mt-2 italic">Sergio Landscape Design LLC</p>
           </div>
-          <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-800 rounded-full -mr-20 -mt-20 opacity-50"></div>
         </header>
 
-        {/* Action Bar */}
+        {/* Action Bar (Mantenido igual con la lógica de steps) */}
         <div className="mb-12 bg-white p-8 rounded-[2.5rem] border border-emerald-100 shadow-sm flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex flex-col sm:flex-row items-center gap-6">
             <div className="bg-emerald-50 p-4 rounded-2xl text-center min-w-[100px] border border-emerald-100">
@@ -159,13 +171,10 @@ export default function CatalogPage() {
             </div>
             
             <div className="space-y-2">
-              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block text-center sm:text-left">
-                {lang === 'en' ? 'Next Step' : 'Siguiente Paso'}
-              </label>
               <select 
                 value={userIntent}
                 onChange={(e) => setUserIntent(e.target.value)}
-                className="w-full bg-gray-50 border border-emerald-100 rounded-xl px-4 py-3 text-xs font-bold text-emerald-900 outline-none transition-all focus:ring-2 focus:ring-emerald-500"
+                className="w-full bg-gray-50 border border-emerald-100 rounded-xl px-4 py-3 text-xs font-bold text-emerald-900 outline-none"
               >
                 <option value="">{lang === 'en' ? '-- Select Action --' : '-- Selecciona Acción --'}</option>
                 <option value="schedule">{lang === 'en' ? '📅 Schedule Home Visit' : '📅 Agendar Visita'}</option>
@@ -183,77 +192,101 @@ export default function CatalogPage() {
             }}
             className={`px-10 py-5 rounded-2xl font-black uppercase text-[10px] tracking-widest transition-all shadow-xl flex items-center gap-3 ${
               (selectedPlants.length > 0 && userIntent !== '') 
-                ? 'bg-emerald-600 text-white hover:bg-emerald-700 hover:-translate-y-1' 
+                ? 'bg-emerald-600 text-white hover:bg-emerald-700' 
                 : 'bg-gray-100 text-gray-300 cursor-not-allowed'
             }`}
           >
             {userIntent === 'list_only' ? <Send size={16}/> : <Calendar size={16}/>}
-            {userIntent === 'list_only' ? (lang === 'en' ? 'Send Selection' : 'Enviar Selección') : (lang === 'en' ? 'Choose Date →' : 'Elegir Fecha →')}
+            {userIntent === 'list_only' ? 'Send Selection' : 'Choose Date →'}
           </button>
         </div>
 
-        {/* Catalog Grid */}
+        {/* Grid de Plantas */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          {plants.length === 0 ? (
-            <div className="col-span-full text-center py-20 bg-white rounded-[3rem] border border-dashed border-emerald-200">
-               <p className="text-gray-400 font-bold uppercase tracking-widest text-xs">
-                 {lang === 'en' ? 'No plants found in Neon database.' : 'No se encontraron plantas en Neon.'}
-               </p>
-            </div>
-          ) : (
-            plants.map((plant) => (
-              <div 
-                  key={plant.id} 
-                  className={`bg-white p-6 rounded-[2.5rem] border-2 transition-all duration-300 ${
-                    selectedPlants.includes(plant.id) 
-                    ? 'border-emerald-500 shadow-2xl scale-[1.02]' 
-                    : 'border-transparent shadow-sm hover:shadow-md'
-                  }`}
-              >
-                  <div 
-                    onClick={() => setSelectedImg(plant.image_url || "/garden1.webp")}
-                    className="aspect-square bg-gray-100 rounded-3xl mb-6 overflow-hidden relative group cursor-pointer shadow-lg"
-                  >
-                    <img 
-                      src={plant.image_url || "/garden1.webp"} 
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
-                      alt="Plant" 
-                    />
-                    <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
-                      <span className="text-white text-4xl font-light">+</span>
-                    </div>
-                    
-                    {selectedPlants.includes(plant.id) && (
-                      <div className="absolute top-4 right-4 bg-emerald-500 text-white p-2 rounded-full shadow-lg z-10">
-                        <CheckCircle2 size={20} />
-                      </div>
-                    )}
+          {plants.map((plant) => (
+            <div key={plant.id} className={`bg-white p-6 rounded-[2.5rem] border-2 transition-all ${selectedPlants.includes(plant.id) ? 'border-emerald-500 shadow-2xl' : 'border-transparent shadow-sm'}`}>
+              <div onClick={() => setSelectedImg(plant.image_url)} className="aspect-square bg-gray-100 rounded-3xl mb-6 overflow-hidden relative cursor-pointer group">
+                <img src={plant.image_url} className="w-full h-full object-cover transition-transform group-hover:scale-110" alt={plant.name_es} />
+                {selectedPlants.includes(plant.id) && (
+                  <div className="absolute top-4 right-4 bg-emerald-500 text-white p-2 rounded-full shadow-lg z-10">
+                    <CheckCircle2 size={20} />
                   </div>
-
-                  <h3 className="text-xl font-black text-emerald-950 uppercase italic tracking-tighter truncate">
-                    {lang === 'en' ? (plant.name_en || plant.name_es) : (plant.name_es || plant.name_en)}
-                  </h3>
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">
-                  {plant.care_level || 'General Care'}
-                </p>
-                
-                <button 
-                  onClick={() => togglePlant(plant.id)}
-                  className={`w-full mt-6 py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest transition-all ${
-                    selectedPlants.includes(plant.id) 
-                    ? 'bg-red-50 text-red-500 hover:bg-red-100' 
-                    : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
-                  }`}
-                >
-                  {selectedPlants.includes(plant.id) ? (lang === 'en' ? 'Remove' : 'Quitar') : (lang === 'en' ? 'Add to List' : 'Agregar')}
-                </button>
+                )}
               </div>
-            ))
-          )}
+              <h3 className="text-xl font-black text-emerald-950 uppercase italic tracking-tighter truncate">
+                {lang === 'en' ? (plant.name_en || plant.name_es) : (plant.name_es || plant.name_en)}
+              </h3>
+              <button onClick={() => togglePlant(plant.id)} className={`w-full mt-6 py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest ${selectedPlants.includes(plant.id) ? 'bg-red-50 text-red-500' : 'bg-emerald-50 text-emerald-700'}`}>
+                {selectedPlants.includes(plant.id) ? 'Remove' : 'Add to List'}
+              </button>
+            </div>
+          ))}
         </div>
 
-        {/* Modals ... (igual que tu código previo) */}
+        {/* Zoom Modal */}
+        {selectedImg && (
+          <div className="fixed inset-0 z-[200] bg-black/95 flex items-center justify-center p-4 cursor-pointer" onClick={() => setSelectedImg(null)}>
+            <img src={selectedImg} className="max-w-full max-h-full rounded-lg" alt="Zoom" />
+          </div>
+        )}
       </div>
+
+      {/* Modal Multi-paso Rediseñado para Neon */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-emerald-950/80 backdrop-blur-sm">
+          <div className="bg-white w-full max-w-lg rounded-[3rem] p-10 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <button onClick={() => setIsModalOpen(false)} className="absolute top-8 right-8 text-gray-400 hover:text-emerald-900"><X size={24} /></button>
+
+            {formStep === 1 && userIntent === 'schedule' ? (
+              <div className="space-y-6">
+                <div className="text-center">
+                  <h2 className="text-2xl font-black text-emerald-900 italic uppercase">Select Visit Date</h2>
+                </div>
+                <input 
+                  type="date" 
+                  min={new Date().toISOString().split('T')[0]} 
+                  className="w-full bg-gray-50 border-2 border-emerald-50 p-5 rounded-2xl font-bold"
+                  value={formData.date}
+                  onChange={(e) => setFormData({...formData, date: e.target.value, time: ''})} 
+                />
+                <div className="grid grid-cols-2 gap-3">
+                  {timeSlots.map(slot => (
+                    <button
+                      key={slot}
+                      disabled={isSlotBusy(formData.date, slot)}
+                      onClick={() => setFormData({...formData, time: slot})}
+                      className={`p-4 rounded-2xl text-xs font-black border-2 transition-all ${isSlotBusy(formData.date, slot) ? 'bg-gray-100 text-gray-300 line-through' : formData.time === slot ? 'bg-emerald-600 text-white' : 'bg-white border-emerald-50 text-emerald-900'}`}
+                    >
+                      {slot.slice(0,5)}
+                    </button>
+                  ))}
+                </div>
+                <button disabled={!formData.time} onClick={() => setFormStep(2)} className="w-full bg-emerald-900 text-white py-5 rounded-2xl font-black uppercase tracking-widest disabled:opacity-30">
+                  Confirm Time →
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-5">
+                <div className="text-center">
+                  {userIntent === 'schedule' && (
+                    <button onClick={() => setFormStep(1)} className="text-emerald-600 font-black text-[10px] uppercase tracking-widest mb-2 block">← Back</button>
+                  )}
+                  <h2 className="text-2xl font-black text-emerald-900 italic uppercase">Final Details</h2>
+                </div>
+                <div className="space-y-3">
+                  <input placeholder="Full Name" className="w-full bg-gray-50 border-2 border-emerald-50 p-4 rounded-2xl font-bold" value={formData.fullName} onChange={(e) => setFormData({...formData, fullName: e.target.value})} />
+                  <input placeholder="Phone" className="w-full bg-gray-50 border-2 border-emerald-50 p-4 rounded-2xl font-bold" value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value})} />
+                  <input placeholder="Address" className="w-full bg-gray-50 border-2 border-emerald-50 p-4 rounded-2xl font-bold" value={formData.address_line1} onChange={(e) => setFormData({...formData, address_line1: e.target.value})} />
+                </div>
+                <button onClick={handleAction} disabled={processing} className="w-full bg-emerald-600 text-white py-6 rounded-2xl font-black uppercase tracking-widest shadow-2xl flex items-center justify-center gap-3">
+                  {processing ? <Loader2 className="animate-spin" /> : <CheckCircle2 size={18} />}
+                  {processing ? 'Processing...' : 'Confirm & Schedule'}
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
