@@ -58,17 +58,31 @@ export default function Navbar() {
                     <Link href="/inventory" className="text-[10px] font-black uppercase tracking-widest text-emerald-800 hover:text-emerald-600 transition-colors">
                       {lang === 'en' ? 'Inventory' : 'Inventario'}
                     </Link>
+                        <Link href="/myappointments" className="text-[10px] font-black uppercase tracking-widest text-emerald-800 hover:text-emerald-600 transition-colors">
+                      {lang === 'en' ? 'MyAppointments' : 'Mis citas'}
+                    </Link>
+                           <Link href="/plants" className="text-[10px] font-black uppercase tracking-widest text-emerald-800">
+                  {lang === 'en' ? 'Gallery' : 'Galería'}
+                </Link>
                   </>
                 )}
 
-                <Link href="/plants" className="text-[10px] font-black uppercase tracking-widest text-emerald-800">
-                  {lang === 'en' ? 'Gallery' : 'Galería'}
-                </Link>
+                
 
                 {role === 'user' && (
+                  <>  
                   <Link href="/myappointments" className="text-[10px] font-black uppercase tracking-widest text-emerald-800">
                     {lang === 'en' ? 'My Appointments' : 'Mis Citas'}
                   </Link>
+
+                  <Link href="/plants" className="text-[10px] font-black uppercase tracking-widest text-emerald-800">
+                  {lang === 'en' ? 'Gallery' : 'Galería'}
+                </Link>
+
+                  </>
+                
+                  
+                  
                 )}
 
                 <UserButton/>

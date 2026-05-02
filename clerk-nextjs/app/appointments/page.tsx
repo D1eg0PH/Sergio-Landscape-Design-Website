@@ -73,34 +73,39 @@ export default function AdminPanel() {
     }
   };
 
-  // 3. ELIMINAR REGISTRO
-  const deleteItem = async (id: string | number, type: 'appointments' | 'messages') => {
+const deleteItem = async (id: string | number, type: 'appointments' | 'messages') => {
     if (!confirm('¿Eliminar permanentemente este registro?')) return;
     
     setActionLoading(id);
     try {
-      const endpoint = type === 'appointments' 
-        ? `/api/appointments?id=${id}` 
-        : `/api/contact?id=${id}`;
+      // Usamos URLSearchParams para asegurar que el ID se envíe correctamente
+      const params = new URLSearchParams({ id: id.toString() });
+      const baseUrl = type === 'appointments' ? '/api/appointments' : '/api/contact';
+      const endpoint = `${baseUrl}?${params.toString()}`;
 
-      const res = await fetch(endpoint, { method: 'DELETE' });
+      const res = await fetch(endpoint, { 
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' }
+      });
 
       if (res.ok) {
+        // Actualización de estado local para que desaparezca de la vista inmediatamente
         if (type === 'appointments') {
-          setAppointments(prev => prev.filter(item => item.id !== id));
+          setAppointments(prev => prev.filter(item => String(item.id) !== String(id)));
         } else {
-          setMessages(prev => prev.filter(item => item.id !== id));
+          setMessages(prev => prev.filter(item => String(item.id) !== String(id)));
         }
       } else {
-        throw new Error("No se pudo eliminar de la base de datos");
+        const errorData = await res.json();
+        throw new Error(errorData.error || "No se pudo eliminar de la base de datos");
       }
     } catch (error: any) {
-      alert(error.message);
+      alert("Error al eliminar: " + error.message);
     } finally {
       setActionLoading(null);
     }
   };
-
+  
   const formatTime = (time: string) => {
     if (!time) return 'N/A';
     const [hours, minutes] = time.split(':');
