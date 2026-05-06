@@ -9,7 +9,9 @@ import { X } from 'lucide-react'; // Importa el icono de cerrar
 
 const photos = [
   '/portfolio/trabajo1.jpeg', '/portfolio/trabajo2.jpeg', '/portfolio/trabajo3.jpeg',
-  '/portfolio/trabajo4.jpeg', '/portfolio/trabajo5.jpeg', '/portfolio/trabajo6.jpeg','/portfolio/trabajo7.jpeg','/portfolio/trabajo8.jpeg','/portfolio/trabajo9.jpeg','/portfolio/trabajo10.jpeg','/portfolio/trabajo11.jpeg'
+  '/portfolio/trabajo4.jpeg', '/portfolio/trabajo5.jpeg', '/portfolio/trabajo6.jpeg',
+  '/portfolio/trabajo7.jpeg','/portfolio/trabajo8.jpeg','/portfolio/trabajo9.jpeg',
+  '/portfolio/trabajo10.jpeg','/portfolio/trabajo11.jpeg','/portfolio/trabajo12.jpeg',
 ];
 
 export default function PortfolioPage() {
