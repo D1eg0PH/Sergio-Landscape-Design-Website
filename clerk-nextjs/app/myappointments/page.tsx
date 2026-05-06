@@ -45,7 +45,7 @@ export default function MyAppointments() {
     return (
       <div className="h-screen flex flex-col items-center justify-center bg-gray-50 gap-4">
         <div className="w-10 h-10 border-4 border-emerald-900 border-t-transparent rounded-full animate-spin"></div>
-        <p className="text-emerald-900 font-black uppercase tracking-widest text-[10px]">Cargando tu historial...</p>
+        <p className="text-emerald-900 font-black uppercase tracking-widest text-[10px]">Loading...</p>
       </div>
     );
   }
