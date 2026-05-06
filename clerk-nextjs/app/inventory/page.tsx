@@ -138,17 +138,32 @@ export default function PlantManager() {
                   <p className="font-black text-xs uppercase truncate text-emerald-950 italic">{plant.name_es}</p>
                   <p className="text-[9px] text-gray-400 font-bold uppercase tracking-wider">{plant.category}</p>
                 </div>
-                <button 
-                  onClick={async () => {
-                    if(confirm('¿Eliminar esta planta?')) {
-                      await fetch(`/api/plants?id=${plant.id}`, { method: 'DELETE' });
-                      fetchPlants();
-                    }
-                  }} 
-                  className="p-2 text-gray-200 hover:text-red-500 transition-colors"
-                >
-                  <Trash2 size={18} />
-                </button>
+               <button 
+  onClick={async () => {
+    if(confirm('¿Eliminar esta planta?')) {
+      try {
+        const response = await fetch(`/api/plants?id=${plant.id}`, { 
+          method: 'DELETE' 
+        });
+        
+        const result = await response.json();
+
+        if (response.ok) {
+          // Si el borrado fue exitoso en el backend, actualizamos la lista local
+          await fetchPlants();
+        } else {
+          alert("Error del servidor: " + (result.error || "No se pudo borrar"));
+        }
+      } catch (err) {
+        console.error("Error en la petición:", err);
+        alert("Error de conexión al intentar borrar.");
+      }
+    }
+  }} 
+  className="p-2 text-gray-200 hover:text-red-500 transition-colors"
+>
+  <Trash2 size={18} />
+</button>
               </div>
             ))
           )}

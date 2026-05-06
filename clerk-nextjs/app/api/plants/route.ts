@@ -70,6 +70,56 @@ export async function POST(req: Request) {
   }
 }
 
+
+// GET: Ahora solo trae las plantas activas
+export async function GET() {
+  try {
+    const sql = getSql();
+    // Filtramos para que Sergio solo vea lo que sigue a la venta
+    const data = await sql`
+      SELECT * FROM plants_catalog 
+      WHERE is_active = TRUE 
+      ORDER BY id DESC
+    `;
+    return NextResponse.json(data);
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+
+// DELETE: Ahora es un "Soft Delete" (Baja lógica)
+export async function DELETE(req: Request) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get('id');
+
+    if (!id) return NextResponse.json({ error: "ID requerido" }, { status: 400 });
+
+    const sql = getSql();
+    const numericId = BigInt(id);
+
+    // En lugar de DELETE, hacemos UPDATE
+    const result = await sql`
+      UPDATE plants_catalog 
+      SET is_active = FALSE 
+      WHERE id = ${numericId}
+      RETURNING *
+    `;
+
+    if (result.length === 0) {
+      return NextResponse.json({ error: "No se encontró la planta" }, { status: 404 });
+    }
+
+    return NextResponse.json({ message: "Planta archivada con éxito" });
+  } catch (error: any) {
+    console.error("Error al archivar:", error.message);
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+
+
+
+/*
 // GET y DELETE simplificados
 export async function GET() {
   try {
@@ -83,12 +133,33 @@ export async function GET() {
 
 export async function DELETE(req: Request) {
   try {
-    const id = new URL(req.url).searchParams.get('id');
-    if (!id) return NextResponse.json({ error: "ID requerido" }, { status: 400 });
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get('id');
+
+    if (!id) {
+      return NextResponse.json({ error: "ID requerido" }, { status: 400 });
+    }
+
     const sql = getSql();
-    await sql`DELETE FROM plants_catalog WHERE id = ${id}`;
-    return NextResponse.json({ message: "Eliminado" });
+    
+    // Convertimos a BigInt para asegurar que Neon encuentre el registro
+    const numericId = BigInt(id);
+
+    const result = await sql`
+      DELETE FROM plants_catalog 
+      WHERE id = ${numericId}
+      RETURNING *
+    `;
+
+    if (result.length === 0) {
+      return NextResponse.json({ error: "No se encontró la planta en la base de datos" }, { status: 404 });
+    }
+
+    return NextResponse.json({ message: "Eliminado con éxito", deleted: result[0] });
   } catch (error: any) {
+    console.error("Error en DELETE:", error.message);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+
+*/

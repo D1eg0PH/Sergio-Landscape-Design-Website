@@ -26,7 +26,7 @@ export default function Navbar() {
 
         <div className="flex items-center gap-6">
           <div className="hidden md:flex gap-6 items-center">
-            <Link href="/home" className="text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-emerald-700 transition-colors">
+            <Link href="/" className="text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-emerald-700 transition-colors">
               {lang === 'en' ? 'Home' : 'Inicio'}
             </Link>
             <Link href="/contact" className="text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-emerald-700 transition-colors">
@@ -59,7 +59,7 @@ export default function Navbar() {
                       {lang === 'en' ? 'Inventory' : 'Inventario'}
                     </Link>
                         <Link href="/myappointments" className="text-[10px] font-black uppercase tracking-widest text-emerald-800 hover:text-emerald-600 transition-colors">
-                      {lang === 'en' ? 'MyAppointments' : 'Mis citas'}
+                      {lang === 'en' ? 'My Appointments' : 'Mis citas'}
                     </Link>
                            <Link href="/plants" className="text-[10px] font-black uppercase tracking-widest text-emerald-800">
                   {lang === 'en' ? 'Gallery' : 'Galería'}
