@@ -2,10 +2,13 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
 // 1. Definimos qué rutas son accesibles para TODO el mundo
 const isPublicRoute = createRouteMatcher([
-  '/home', 
+  '/', 
   '/contact', 
-  '/api/contact', // <--- Esta es la clave para Sergio
-  '/catalog'
+  '/api/contact',
+  '/schedule',
+  '/api/busy-slots',
+  '/api/appointments',
+  
 ]);
 
 export default clerkMiddleware(async (auth, request) => {

@@ -64,8 +64,31 @@ export default function SchedulePage() {
     service: 'Landscape Design'
   });
 
-  const slots = ["08:00", "10:00", "12:00", "14:00", "16:00"];
+  const slots = ["08:00","9:00", "10:00","11:00", "12:00","13:00", "14:00","15:00", "16:00"];
 
+
+
+ useEffect(() => {
+  async function getBusy() {
+    try {
+      // Apuntamos a la ruta pública que creamos específicamente para esto
+      const res = await fetch('/api/busy-slots'); 
+      if (!res.ok) throw new Error("Error fetching availability");
+      const data = await res.json();
+      
+      // Guardamos los datos asegurándonos de que sea un array
+      if (Array.isArray(data)) {
+        setBusy(data);
+      }
+    } catch (err) {
+      console.error("Error cargando disponibilidad:", err);
+    }
+  }
+  getBusy();
+}, []);
+
+
+  /*
   useEffect(() => {
     async function getBusy() {
       try {
@@ -79,7 +102,45 @@ export default function SchedulePage() {
     }
     getBusy();
   }, []);
+*/
 
+
+const isBusy = (time: string) => {
+  if (!selectedDate || busy.length === 0) return false;
+  
+  // Generamos el YYYY-MM-DD de la fecha seleccionada por el usuario
+  const selectedDateStr = format(selectedDate, "yyyy-MM-dd");
+
+  return busy.some(a => {
+    // Si la fecha de la DB ya es string, tomamos los primeros 10 caracteres.
+    // Si es un objeto Date, lo formateamos igual que la seleccionada.
+    const dbDate = a.appointment_date instanceof Date 
+      ? format(a.appointment_date, "yyyy-MM-dd")
+      : String(a.appointment_date).slice(0, 10);
+    
+    const dbTime = a.appointment_time?.slice(0, 5); 
+
+    return dbDate === selectedDateStr && dbTime === time;
+  });
+};
+
+const isDayFullyBooked = (date: Date) => {
+  if (busy.length === 0) return false;
+  const dateStr = format(date, "yyyy-MM-dd");
+  
+  const activeOnDay = busy.filter(a => {
+    const dbDate = a.appointment_date instanceof Date 
+      ? format(a.appointment_date, "yyyy-MM-dd")
+      : String(a.appointment_date).slice(0, 10);
+    return dbDate === dateStr;
+  });
+
+  return activeOnDay.length >= slots.length;
+};
+
+
+
+/*
  const isBusy = (time: string) => {
     if (!selectedDate) return false;
     
@@ -101,11 +162,15 @@ export default function SchedulePage() {
     });
   };
 
+ 
+
   const isDayFullyBooked = (date: Date) => {
     const dateStr = format(date, "yyyy-MM-dd");
     const activeOnDay = busy.filter(a => a.appointment_date === dateStr && a.status !== 'cancelled');
     return activeOnDay.length >= slots.length;
   };
+
+   */
 
   const send = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -131,7 +196,7 @@ export default function SchedulePage() {
 
       if (res.ok) {
         alert(t.success);
-        router.push('/home');
+        router.push('/');
       } else {
         const err = await res.json();
         alert(err.error || "Error");
