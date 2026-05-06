@@ -7,8 +7,20 @@ import { esES } from "@clerk/localizations"; // Ya funcionará tras el npm insta
 
 import ClerkLocalizationWrapper from '@/components/ClerkLocalizationWrapper';
 
+
+import type { Metadata } from "next";
+
 const montserrat = Montserrat({ subsets: ['latin'] })
 
+
+export const metadata: Metadata = {
+  title: "Sergio Landscape Design LLC", // Esto es lo que sale en la pestaña
+  description: "Professional gardening and landscaping services",
+  icons: {
+    icon: "/favicon.ico", // Asegúrate de tener tu logo en la carpeta /public
+    apple: "/apple-touch-icon.png"
+  },
+};
 
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
