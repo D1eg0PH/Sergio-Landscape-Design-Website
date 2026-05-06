@@ -64,7 +64,7 @@ export default function SchedulePage() {
     service: 'Landscape Design'
   });
 
-  const slots = ["08:00","09:00", "10:00","11:00", "12:00","13:00", "14:00","15:00", "16:00"];
+  const slots = ["08:00", "10:00","12:00", "14:00","16:00", "18:00"];
 
 
 
@@ -213,8 +213,8 @@ const isDayFullyBooked = (date: Date) => {
   const send = async (e: React.FormEvent) => {
   e.preventDefault();
   
-  // Quitamos formData.email de esta validación para que sea opcional
-  if (!selectedDate || !formData.time || !formData.fullName || !formData.phone || !formData.address) {
+  // Añadimos !formData.email a la lista de obligatorios
+  if (!selectedDate || !formData.time || !formData.fullName || !formData.phone || !formData.address || !formData.email) {
     alert(t.errorTitle);
     return;
   }
@@ -322,6 +322,7 @@ const isDayFullyBooked = (date: Date) => {
                 />
                 <input 
                   type="email" // Sin "required", es opcional
+                  required
                   placeholder={t.emailPl} 
                   className="w-full p-4 bg-slate-50 rounded-2xl outline-none"
                   value={formData.email} 
