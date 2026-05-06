@@ -1,25 +1,29 @@
 import { neon } from '@neondatabase/serverless';
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 
-// 1. Agregamos la función que falta (la que viste en el archivo de Plants)
 const getSql = () => {
   const connectionString = (process.env.DATABASE_URL || "").split('&')[0].trim();
   return neon(connectionString);
 };
 
+// Definimos la interfaz para que TypeScript sepa que params es una Promesa
+interface RouteContext {
+  params: Promise<{ id: string }>;
+}
+
 export async function PATCH(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  context: RouteContext // Cambiamos la estructura aquí
 ) {
   try {
-    const { id } = params;
+    // 1. IMPORTANTE: Usar await para obtener los params
+    const { id } = await context.params;
     const { status } = await request.json();
 
     if (!id || id === 'undefined' || !status) {
       return NextResponse.json({ error: "ID o Status faltante" }, { status: 400 });
     }
 
-    // 2. Usamos getSql() igual que en el archivo de plantas
     const sql = getSql();
     const numericId = BigInt(id);
 
@@ -42,11 +46,13 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  context: RouteContext // Cambiamos la estructura aquí también
 ) {
   try {
-    const { id } = params;
+    // 2. IMPORTANTE: Usar await para obtener el id
+    const { id } = await context.params;
+    
     const sql = getSql();
     const numericId = BigInt(id);
 
