@@ -48,7 +48,7 @@ export default function Navbar() {
             {!isSignedIn && (
               <SignInButton mode="modal">
                 <button className="bg-emerald-900 text-white px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg hover:bg-emerald-800 transition-all">
-                  {lang === 'en' ? 'Client Login' : 'Iniciar Sesión'}
+                  {lang === 'en' ? 'Login' : 'Iniciar Sesión'}
                 </button>
               </SignInButton>
             )}
@@ -69,6 +69,9 @@ export default function Navbar() {
                     <Link href="/plants" className="text-[10px] font-black uppercase tracking-widest text-emerald-800">
                       {lang === 'en' ? 'Gallery' : 'Galería'}
                     </Link>
+                     <Link href="/portfolio" className="text-[10px] font-black uppercase tracking-widest text-emerald-800">
+                      {lang === 'en' ? 'Portfolio' : 'Portafolio'}
+                    </Link>
                   </>
                 )}
 
@@ -79,6 +82,9 @@ export default function Navbar() {
                     </Link>
                     <Link href="/plants" className="text-[10px] font-black uppercase tracking-widest text-emerald-800">
                       {lang === 'en' ? 'Gallery' : 'Galería'}
+                    </Link>
+                    <Link href="/portfolio" className="text-[10px] font-black uppercase tracking-widest text-emerald-800">
+                      {lang === 'en' ? 'Portfolio' : 'Portafolio'}
                     </Link>
                   </>
                 )}

@@ -165,7 +165,7 @@ async function fetchData() {
         {/* Action Bar (Mantenido igual con la lógica de steps) */}
         <div className="mb-12 bg-white p-8 rounded-[2.5rem] border border-emerald-100 shadow-sm flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex flex-col sm:flex-row items-center gap-6">
-            <div className="bg-emerald-50 p-4 rounded-2xl text-center min-w-[100px] border border-emerald-100">
+            <div className="bg-emerald-50 p-4 rounded-2xl text-center .min-w-[100px] border border-emerald-100">
               <p className="text-[10px] font-black text-emerald-800 uppercase tracking-widest mb-1">Selected</p>
               <h2 className="text-3xl font-black text-emerald-900 italic leading-none">{selectedPlants.length}</h2>
             </div>
@@ -202,7 +202,7 @@ async function fetchData() {
         </div>
 
         {/* Grid de Plantas */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
           {plants.map((plant) => (
             <div key={plant.id} className={`bg-white p-6 rounded-[2.5rem] border-2 transition-all ${selectedPlants.includes(plant.id) ? 'border-emerald-500 shadow-2xl' : 'border-transparent shadow-sm'}`}>
               <div onClick={() => setSelectedImg(plant.image_url)} className="aspect-square bg-gray-100 rounded-3xl mb-6 overflow-hidden relative cursor-pointer group">
@@ -216,7 +216,7 @@ async function fetchData() {
               <h3 className="text-xl font-black text-emerald-950 uppercase italic tracking-tighter truncate">
                 {lang === 'en' ? (plant.name_en || plant.name_es) : (plant.name_es || plant.name_en)}
               </h3>
-              <button onClick={() => togglePlant(plant.id)} className={`w-full mt-6 py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest ${selectedPlants.includes(plant.id) ? 'bg-red-50 text-red-500' : 'bg-emerald-50 text-emerald-700'}`}>
+              <button onClick={() => togglePlant(plant.id)} className={`w-full mt-4 py-3 rounded-2xl font-black uppercase text-[10px] tracking-widest ${selectedPlants.includes(plant.id) ? 'bg-red-50 text-red-500' : 'bg-emerald-50 text-emerald-700'}`}>
                 {selectedPlants.includes(plant.id) ? 'Remove' : 'Add to List'}
               </button>
             </div>
