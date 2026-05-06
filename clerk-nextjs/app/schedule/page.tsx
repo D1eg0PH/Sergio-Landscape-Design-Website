@@ -64,7 +64,7 @@ export default function SchedulePage() {
     service: 'Landscape Design'
   });
 
-  const slots = ["08:00","9:00", "10:00","11:00", "12:00","13:00", "14:00","15:00", "16:00"];
+  const slots = ["08:00","09:00", "10:00","11:00", "12:00","13:00", "14:00","15:00", "16:00"];
 
 
 
@@ -170,7 +170,7 @@ const isDayFullyBooked = (date: Date) => {
     return activeOnDay.length >= slots.length;
   };
 
-   */
+   
 
   const send = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -207,6 +207,47 @@ const isDayFullyBooked = (date: Date) => {
       setLoading(false);
     }
   };
+
+  */
+
+  const send = async (e: React.FormEvent) => {
+  e.preventDefault();
+  
+  // Quitamos formData.email de esta validación para que sea opcional
+  if (!selectedDate || !formData.time || !formData.fullName || !formData.phone || !formData.address) {
+    alert(t.errorTitle);
+    return;
+  }
+
+  setLoading(true);
+  try {
+    const res = await fetch('/api/appointments', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        ...formData,
+        appointment_date: format(selectedDate, "yyyy-MM-dd"),
+        appointment_time: formData.time + ":00",
+        full_name: formData.fullName,
+        address_line1: formData.address,
+        service_type: formData.service,
+        // El email se envía tal cual esté (vacío o lleno)
+      })
+    });
+
+    if (res.ok) {
+      alert(t.success);
+      router.push('/');
+    } else {
+      const err = await res.json();
+      alert(err.error || "Error");
+    }
+  } catch (err) {
+    alert("Error de conexión");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -264,18 +305,30 @@ const isDayFullyBooked = (date: Date) => {
             )}
           </div>
 
-          <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-emerald-50 space-y-4">
+          <div className="bg-white p-8 .rounded-[2rem] shadow-sm border border-emerald-50 space-y-4">
             <h2 className="font-bold text-emerald-900 flex items-center gap-2 uppercase mb-2">
               <User size={20} /> 2. {t.yourI}
             </h2>
             <input required placeholder={t.namePl} className="w-full p-4 bg-slate-50 rounded-2xl outline-none focus:ring-2 ring-emerald-100"
               value={formData.fullName} onChange={e => setFormData({...formData, fullName: e.target.value})} />
-            <div className="grid grid-cols-2 gap-4">
-              <input required placeholder={t.phonePl} className="w-full p-4 bg-slate-50 rounded-2xl outline-none"
-                value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} />
-              <input type="email" placeholder={t.emailPl} className="w-full p-4 bg-slate-50 rounded-2xl outline-none"
-                value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
-            </div>
+            
+                <div className="grid grid-cols-2 gap-4">
+                <input 
+                  required // El teléfono es obligatorio
+                  placeholder={t.phonePl} 
+                  className="w-full p-4 bg-slate-50 rounded-2xl outline-none"
+                  value={formData.phone} 
+                  onChange={e => setFormData({...formData, phone: e.target.value})} 
+                />
+                <input 
+                  type="email" // Sin "required", es opcional
+                  placeholder={t.emailPl} 
+                  className="w-full p-4 bg-slate-50 rounded-2xl outline-none"
+                  value={formData.email} 
+                  onChange={e => setFormData({...formData, email: e.target.value})} 
+                />
+              </div>
+
             <input required placeholder={t.addressPl} className="w-full p-4 bg-slate-50 rounded-2xl outline-none focus:ring-2 ring-emerald-100"
               value={formData.address} onChange={e => setFormData({...formData, address: e.target.value})} />
             

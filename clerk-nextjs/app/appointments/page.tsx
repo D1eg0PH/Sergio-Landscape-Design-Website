@@ -157,12 +157,12 @@ const deleteItem = async (id: string | number, type: 'appointments' | 'messages'
             <div className="space-y-6">
               {appointments.length === 0 ? <EmptyState text="No hay citas registradas" /> : (
                 appointments.map((app) => (
-                  <div key={app.id} className={`bg-white rounded-[2rem] border border-emerald-50 shadow-sm p-8 transition-opacity ${actionLoading === app.id ? 'opacity-50 pointer-events-none' : ''}`}>
+                  <div key={app.id} className={`bg-white .rounded-[2rem] border border-emerald-50 shadow-sm p-8 transition-opacity ${actionLoading === app.id ? 'opacity-50 pointer-events-none' : ''}`}>
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
                       
                       {/* INFORMACIÓN DE LA CITA */}
                       <div className="lg:col-span-8 flex gap-6 items-start">
-                        <div className={`w-2 h-20 rounded-full flex-shrink-0 ${app.status === 'confirmed' ? 'bg-emerald-500' : app.status === 'cancelled' ? 'bg-red-400' : 'bg-amber-400'}`} />
+                        <div className={`w-2 h-20 rounded-full .flex-shrink-0 ${app.status === 'confirmed' ? 'bg-emerald-500' : app.status === 'cancelled' ? 'bg-red-400' : 'bg-amber-400'}`} />
                         <div className="flex-1">
                           <span className="bg-emerald-900 text-white text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-widest italic">
                             {app.service_type || 'General Service'}
@@ -193,9 +193,18 @@ const deleteItem = async (id: string | number, type: 'appointments' | 'messages'
                             <span className="flex items-center gap-1"><Calendar size={14}/> {app.appointment_date || 'Solo Lista'}</span>
                             <span className="flex items-center gap-1"><Clock size={14}/> {formatTime(app.appointment_time)}</span>
                             <span className="flex items-center gap-1"><Phone size={14}/> {app.phone}</span>
+                            
+                            {app.address_line1 && (
+                            <span className="flex items-center gap-1 text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md">
+                              <MapPin size={14}/> {app.address_line1} {app.city ? `(${app.city})` : ''}
+                            </span>
+                            )}          
+
                           </div>
                         </div>
                       </div>
+
+           
 
                       {/* ACCIONES */}
                       <div className="lg:col-span-4 flex flex-col gap-2">
@@ -253,7 +262,7 @@ const deleteItem = async (id: string | number, type: 'appointments' | 'messages'
                         <Trash2 size={18} />
                       </button>
                     </div>
-                    <div className="bg-gray-50 rounded-[1.5rem] p-5 border border-emerald-50 flex-grow mb-6 italic text-gray-600 text-sm">
+                    <div className="bg-gray-50 .rounded-[1.5rem] p-5 border border-emerald-50 .flex-grow mb-6 italic text-gray-600 text-sm">
                       "{msg.message}"
                     </div>
                     <div className="flex justify-between items-center">
@@ -274,7 +283,7 @@ const deleteItem = async (id: string | number, type: 'appointments' | 'messages'
       {/* MODAL DE ZOOM */}
 {selectedImg && (
   <div 
-    className="fixed inset-0 z-[100] bg-emerald-950/90 backdrop-blur-md flex items-center justify-center p-4"
+    className="fixed inset-0 .z-[100] bg-emerald-950/90 backdrop-blur-md flex items-center justify-center p-4"
     onClick={() => setSelectedImg(null)}
   >
     <div className="relative max-w-3xl w-full aspect-square bg-white rounded-[3rem] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300">
