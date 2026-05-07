@@ -15,15 +15,10 @@ const montserrat = Montserrat({ subsets: ['latin'] })
 export const metadata: Metadata = {
   title: "Sergio Landscape Design LLC", // Esto es lo que sale en la pestaña
   description: "Professional gardening and landscaping services",
-  icons: {
-      icon: [
-        {
-          url: "/icon.png?v=2", // Agregamos ?v=2 para romper la caché
-          href: "/icon.png?v=2",
-        },
-      ],
-      shortcut: "/icon.png?v=2",
-      apple: "/icon.png?v=2",
+  icons: { 
+        icon: "https://www.sergiolandscape.com/icon.png?v=3", 
+        apple: "https://www.sergiolandscape.com/icon.png?v=3",
+    
     },
 };
 
