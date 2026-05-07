@@ -106,13 +106,13 @@ export default function PortfolioPage() {
       {selectedImage && (
         // Overlay oscuro de fondo
         <div 
-          className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 md:p-10 cursor-zoom-out"
+          className="fixed inset-0 .z-[100] bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 md:p-10 cursor-zoom-out"
           onClick={() => setSelectedImage(null)} // Cerrar al hacer clic fuera
         >
           {/* Botón Cerrar */}
           <button 
             onClick={() => setSelectedImage(null)} 
-            className="absolute top-6 right-6 z-[110] bg-white text-black p-3 rounded-full hover:bg-emerald-100 transition-colors shadow-lg"
+            className="absolute top-6 right-6 .z-[110] bg-white text-black p-3 rounded-full hover:bg-emerald-100 transition-colors shadow-lg"
             title={text.close}
           >
             <X size={24} />
