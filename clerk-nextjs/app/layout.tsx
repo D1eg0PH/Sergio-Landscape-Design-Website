@@ -16,8 +16,8 @@ export const metadata: Metadata = {
   title: "Sergio Landscape Design LLC", // Esto es lo que sale en la pestaña
   description: "Professional gardening and landscaping services",
   icons: { 
-        icon: "/tree-sergio.png", 
-        apple: "/tree-sergio.png",
+        icon: "/icon.png", 
+        apple: "/icon.png",
     
     },
 };
