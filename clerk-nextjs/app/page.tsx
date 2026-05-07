@@ -118,7 +118,7 @@ export default function SergioLandscapeHome() {
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 auto-rows-[200px]">
-            {['garden1.webp', 'garden2.webp', 'garden3.webp', 'garden4.webp', 'garden5.webp'].map((img, idx) => (
+            {['garden1.webp', 'garden2.webp', 'garden3.webp', 'garden5.webp'].map((img, idx) => (
               <div 
                 key={idx}
                 onClick={() => setSelectedImg(`/${img}`)} 
