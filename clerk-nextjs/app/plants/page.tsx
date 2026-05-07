@@ -12,15 +12,18 @@ export default function CatalogPage() {
   
   const [selectedImg, setSelectedImg] = useState<string | null>(null);
 
+
   // Estados de Control
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
+  
   
   // Estados de Datos
   const [plants, setPlants] = useState<any[]>([]);
   const [appointments, setAppointments] = useState<any[]>([]);
   const [selectedPlants, setSelectedPlants] = useState<number[]>([]);
   const [userIntent, setUserIntent] = useState<string>(''); 
+  
 
   // Estados de Formulario/Modal
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -49,6 +52,8 @@ export default function CatalogPage() {
       }
     }
   }, [isLoaded, isSignedIn, router]);
+
+  
 async function fetchData() {
   try {
     setLoading(true);
@@ -91,6 +96,8 @@ async function fetchData() {
     );
   };
 
+
+  
   const isSlotBusy = (date: string, time: string) => {
     return appointments.some(app => app.appointment_date === date && app.appointment_time === time);
   };
@@ -102,10 +109,12 @@ async function fetchData() {
       return;
     }
 
+  
    setProcessing(true);
   try {
     // 1. Crea un objeto limpio SIN la propiedad 'id'
     const { id, ...dataToSend } = formData as any; // Esto quita el id si existiera en formData
+
 
     const response = await fetch('/api/appointments/create', {
       method: 'POST',
@@ -136,6 +145,19 @@ async function fetchData() {
       setProcessing(false);
     }
   };
+
+
+
+
+    const [selectedCategory, setSelectedCategory] = useState('All');
+  const categories = ['All', 'Plants', 'Trees', 'Palms', 'Hedges'];
+  
+
+  const filteredPlants = selectedCategory === 'All' 
+  ? plants 
+  : plants.filter(p => p.category?.toLowerCase() === selectedCategory.toLowerCase());
+
+  
 
   // Render de carga e interfaz (Mantenemos tu estilo visual premium)
   if (!isLoaded || loading) {
@@ -183,6 +205,23 @@ async function fetchData() {
             </div>
           </div>
 
+          {/* Selector de Categorías */}
+            <div className="flex flex-wrap gap-2 mb-8 pb-6 border-b border-emerald-50">
+              {categories.map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setSelectedCategory(cat)}
+                  className={`px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                    selectedCategory === cat 
+                    ? 'bg-emerald-600 text-white shadow-lg' 
+                    : 'bg-emerald-50 text-emerald-800 hover:bg-emerald-100'
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+
           <button 
             disabled={selectedPlants.length === 0 || userIntent === '' || processing}
             onClick={() => {
@@ -203,7 +242,7 @@ async function fetchData() {
 
         {/* Grid de Plantas */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-          {plants.map((plant) => (
+          {filteredPlants.map((plant) => (
             <div key={plant.id} className={`bg-white p-6 rounded-[2.5rem] border-2 transition-all ${selectedPlants.includes(plant.id) ? 'border-emerald-500 shadow-2xl' : 'border-transparent shadow-sm'}`}>
               <div onClick={() => setSelectedImg(plant.image_url)} className="aspect-square bg-gray-100 rounded-3xl mb-6 overflow-hidden relative cursor-pointer group">
                 <img src={plant.image_url} className="w-full h-full object-cover transition-transform group-hover:scale-110" alt={plant.name_es} />
@@ -225,7 +264,7 @@ async function fetchData() {
 
         {/* Zoom Modal */}
         {selectedImg && (
-          <div className="fixed inset-0 z-[200] bg-black/95 flex items-center justify-center p-4 cursor-pointer" onClick={() => setSelectedImg(null)}>
+          <div className="fixed inset-0 .z-[200] bg-black/95 flex items-center justify-center p-4 cursor-pointer" onClick={() => setSelectedImg(null)}>
             <img src={selectedImg} className="max-w-full max-h-full rounded-lg" alt="Zoom" />
           </div>
         )}
@@ -233,7 +272,7 @@ async function fetchData() {
 
       {/* Modal Multi-paso Rediseñado para Neon */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-emerald-950/80 backdrop-blur-sm">
+        <div className="fixed inset-0 .z-[100] flex items-center justify-center p-6 bg-emerald-950/80 backdrop-blur-sm">
           <div className="bg-white w-full max-w-lg rounded-[3rem] p-10 shadow-2xl relative max-h-[90vh] overflow-y-auto">
             <button onClick={() => setIsModalOpen(false)} className="absolute top-8 right-8 text-gray-400 hover:text-emerald-900"><X size={24} /></button>
 
