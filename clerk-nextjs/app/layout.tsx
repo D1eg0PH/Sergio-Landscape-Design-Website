@@ -3,21 +3,26 @@ import { LanguageProvider } from '@/context/LanguajeContext';
 import Navbar from '@/components/navbar'; 
 import './globals.css' 
 import { Montserrat } from 'next/font/google' 
-import { esES } from "@clerk/localizations"; // Ya funcionará tras el npm install
-import Footer from '@/components/Footer'; // Importa el nuevo componente
-
+import { esES } from "@clerk/localizations"; 
+import Footer from '@/components/Footer'; 
 import ClerkLocalizationWrapper from '@/components/ClerkLocalizationWrapper';
-
-
 import type { Metadata } from "next";
 
-<meta name="apple-mobile-web-app-title" content="Sergio Landscape" />
-
-
 const montserrat = Montserrat({ subsets: ['latin'] })
+
+// --- AQUÍ LA CORRECCIÓN CLAVE ---
 export const metadata: Metadata = {
-  title: "Sergio Landscape Design LLC", // Esto es lo que sale en la pestaña
+  title: "Sergio Landscape Design LLC",
   description: "Professional gardening and landscaping services",
+  // Esta línea reemplaza la etiqueta <meta> que tenías suelta:
+  appleWebApp: {
+    title: "Sergio Landscape",
+  },
+  // Esto asegura que el navegador encuentre los iconos generados
+  icons: {
+    icon: '/favicon.ico',
+    apple: '/apple-touch-icon.png',
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -28,7 +33,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <ClerkLocalizationWrapper>
             <Navbar />
             <main className="min-h-screen">{children}</main> 
-            <Footer /> {/* Ponlo aquí fuera del main */}
+            <Footer />
           </ClerkLocalizationWrapper>
         </LanguageProvider>
       </body>
