@@ -11,15 +11,13 @@ import ClerkLocalizationWrapper from '@/components/ClerkLocalizationWrapper';
 
 import type { Metadata } from "next";
 
+<meta name="apple-mobile-web-app-title" content="Sergio Landscape" />
+
+
 const montserrat = Montserrat({ subsets: ['latin'] })
 export const metadata: Metadata = {
   title: "Sergio Landscape Design LLC", // Esto es lo que sale en la pestaña
   description: "Professional gardening and landscaping services",
-  icons: { 
-        icon: "/tree-sergio.png", 
-        apple: "/tree-sergio.png",
-    
-    },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
