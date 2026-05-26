@@ -49,10 +49,10 @@ export default function SergioLandscapeHome() {
   const t = content[lang as 'en' | 'es'];
 
   return (
-    <div className="font-sans text-gray-900">
+    <div className="font-sans text-gray-900 bg-stone-50">
       
       {/* HERO SECTION */}
-      <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 px-6 bg-stone-50">
+      <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 px-6 ">
         <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
           <div>
             <span className="inline-block px-4 py-1 bg-emerald-100 text-emerald-700 rounded-full text-sm font-bold mb-4">

@@ -91,7 +91,7 @@ export default function Navbar() {
 
             <button
               onClick={() => setLang(lang === 'en' ? 'es' : 'en')}
-              className="bg-gray-100 px-3 py-2 rounded-full text-[10px] font-black border border-gray-200 hover:bg-gray-200 transition-colors"
+              className="bg-gray-300 px-3 py-2 rounded-full text-[10px] font-bold border border-gray-400 hover:bg-gray-500 transition-colors"
             >
               {lang === 'en' ? 'EN' : 'ES'}
             </button>
