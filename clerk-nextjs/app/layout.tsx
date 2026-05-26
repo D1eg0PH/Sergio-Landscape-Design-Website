@@ -39,6 +39,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <Footer />
           </ClerkLocalizationWrapper>
         </LanguageProvider>
+
+        <Analytics />
       </body>
     </html>
   );
