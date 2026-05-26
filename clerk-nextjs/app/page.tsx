@@ -91,7 +91,7 @@ export default function SergioLandscapeHome() {
             {/* VISION */}
             <div className="flex flex-col md:flex-row items-center gap-12">
               <div className="w-full md:w-1/2 aspect-video md:aspect-square rounded-3xl overflow-hidden shadow-2xl">
-                <img src="IMG_6727.jpeg" className="w-full h-full object-cover" alt="Vision" />
+                <img src="IMG_6727.jpg" className="w-full h-full object-cover" alt="Vision" />
               </div>
               <div className="w-full md:w-1/2">
                 <h2 className="text-3xl font-bold mb-6 text-emerald-300">{t.ourVisionTitle}</h2>
@@ -102,7 +102,7 @@ export default function SergioLandscapeHome() {
             {/* MISSION */}
             <div className="flex flex-col md:flex-row-reverse items-center gap-12">
               <div className="w-full md:w-1/2 aspect-video md:aspect-square rounded-3xl overflow-hidden shadow-2xl">
-                <img src="IMG_56492.jpeg" className="w-full h-full object-cover" alt="Mission" />
+                <img src="IMG_56492.jpg" className="w-full h-full object-cover" alt="Mission" />
               </div>
               <div className="w-full md:w-1/2">
                 <h2 className="text-3xl font-bold mb-6 text-emerald-300">{t.ourMissionTitle}</h2>
@@ -134,11 +134,10 @@ export default function SergioLandscapeHome() {
             <p className="text-xl text-emerald-600 font-medium italic">{t.imgDesc}</p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 auto-rows-[200px]">
-            {['garden1.webp', 'garden2.webp', 'garden3.webp', 'garden5.webp'].map((img, idx) => (
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-4 auto-rows-[200px]">
+            {['garden1.webp', 'garden2.webp', 'garden5.webp', 'garden3.webp'].map((img, idx) => (
               <div 
-                key={idx}
-                onClick={() => setSelectedImg(`/${img}`)} 
+                key={idx} onClick={() => setSelectedImg(`/${img}`)} 
                 className={`rounded-3xl overflow-hidden group relative cursor-pointer shadow-lg ${idx === 0 ? 'col-span-2 row-span-2' : ''} ${idx === 3 ? 'col-span-2' : ''}`}
               >
                 <img src={`/${img}`} alt={`Project ${idx}`} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
