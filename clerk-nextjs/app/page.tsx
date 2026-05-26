@@ -21,6 +21,8 @@ export default function SergioLandscapeHome() {
       ourMission:"At Sergio Landscape Design, our mission is to provide the highest quality landscape design services to our clients. We strive to create beautiful outdoor spaces that enhance the natural beauty of the environment while meeting the unique needs of each client.",
       ourServicesTitle:"Our Services",
       ourServices:"We offer a wide range of landscape design services, including garden design, landscape lighting, and more. Whether you're looking to create a lush garden oasis or a functional outdoor space for entertaining, we have the solutions you need.",
+      ourExperienceTitle:"Our Experience ",
+      ourExperience:"With over 15 years of experience, our team of skilled professionals has the expertise and knowledge to bring your vision to life. We use the latest techniques and materials to create stunning landscape designs that are both beautiful and functional.",
       imagesTitle:"Capturing the beauty of nature",
       imgDesc:"Stay tuned!",
       whyUs: "Why Choose Sergio Landscape?",
@@ -38,6 +40,8 @@ export default function SergioLandscapeHome() {
       ourMission:"En Sergio Landscape Design, nuestra misión es brindar servicios de diseño paisajístico de la más alta calidad a nuestros clientes.Nos esforzamos por crear hermosos espacios al aire libre que realcen la belleza natural del entorno, al tiempo que satisfacen las necesidades únicas de cada cliente.",
       ourServicesTitle:"Nuestros Servicios",
       ourServices:"Ofrecemos una amplia gama de servicios de diseño paisajístico, que incluyen diseño de jardines, iluminación de exteriores y más. Ya sea que busque crear un exuberante oasis ajardinado o un espacio al aire libre funcional para recibir invitados, tenemos las soluciones que usted necesita.",
+      ourExperienceTitle:"Nuestra Experiencia"  ,
+      ourExperience:"Con más de 15 años de experiencia, nuestro equipo de profesionales cualificados cuenta con la pericia y el conocimiento necesarios para hacer realidad su visión. Utilizamos las técnicas y los materiales más innovadores para crear impresionantes diseños paisajísticos que son, a la vez, bellos y funcionales.",
       imagesTitle:"Capturando la belleza de la naturaleza",
       imgDesc:"Mantenganse al tanto!",
       whyUs: "¿Por qué elegir Sergio Landscape?",
@@ -87,7 +91,7 @@ export default function SergioLandscapeHome() {
             {/* VISION */}
             <div className="flex flex-col md:flex-row items-center gap-12">
               <div className="w-full md:w-1/2 aspect-video md:aspect-square rounded-3xl overflow-hidden shadow-2xl">
-                <img src="/IMG_6727.jpeg" className="w-full h-full object-cover" alt="Vision" />
+                <img src="IMG_6727.jpeg" className="w-full h-full object-cover" alt="Vision" />
               </div>
               <div className="w-full md:w-1/2">
                 <h2 className="text-3xl font-bold mb-6 text-emerald-300">{t.ourVisionTitle}</h2>
@@ -105,6 +109,19 @@ export default function SergioLandscapeHome() {
                 <p className="text-emerald-50 text-lg leading-relaxed">{t.ourMission}</p>
               </div>
             </div>
+
+
+            {/* EXPERIENCE */}
+            <div className="flex flex-col md:flex-row items-center gap-12">
+              <div className="w-full md:w-1/2 aspect-video md:aspect-square rounded-3xl overflow-hidden shadow-2xl">
+                <img src="/IMG_7690.jpeg" className="w-full h-full object-cover" alt="Vision" />
+              </div>
+              <div className="w-full md:w-1/2">
+                <h2 className="text-3xl font-bold mb-6 text-emerald-300">{t.ourExperienceTitle}</h2>
+                <p className="text-emerald-50 text-lg leading-relaxed">{t.ourExperience}</p>
+              </div>
+            </div>
+
           </div>
         </div>
       </section>

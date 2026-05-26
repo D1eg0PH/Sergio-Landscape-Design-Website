@@ -150,7 +150,7 @@ async function fetchData() {
 
 
     const [selectedCategory, setSelectedCategory] = useState('All');
-  const categories = ['All', 'Plants', 'Trees', 'Palms', 'Hedges'];
+  const categories = ['All', 'Plants', 'Trees', 'Palms', 'Hedges','Topiary'];
   
 
   const filteredPlants = selectedCategory === 'All' 
