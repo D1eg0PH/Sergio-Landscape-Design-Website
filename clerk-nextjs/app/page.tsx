@@ -52,7 +52,7 @@ export default function SergioLandscapeHome() {
     <div className="font-sans text-gray-900">
       
       {/* HERO SECTION */}
-      <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 px-6">
+      <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 px-6 bg-stone-50">
         <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
           <div>
             <span className="inline-block px-4 py-1 bg-emerald-100 text-emerald-700 rounded-full text-sm font-bold mb-4">
@@ -145,7 +145,7 @@ export default function SergioLandscapeHome() {
       )}
 
       {/* WHY CHOOSE US */}
-      <section className="py-24 px-6 max-w-7xl mx-auto">
+      <section className="py-24 px-6 max-w-7xl mx-auto bg-stone-50">
         <div className="bg-emerald-900 rounded-[3rem] p-12 lg:p-20 text-white flex flex-col lg:flex-row gap-12 items-center">
           <div className="lg:w-1/2">
             <h2 className="text-4xl font-bold mb-8">{t.whyUs}</h2>
