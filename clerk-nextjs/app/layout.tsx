@@ -8,6 +8,9 @@ import Footer from '@/components/Footer';
 import ClerkLocalizationWrapper from '@/components/ClerkLocalizationWrapper';
 import type { Metadata } from "next";
 
+import { Analytics } from "@vercel/analytics/next"
+
+
 const montserrat = Montserrat({ subsets: ['latin'] })
 
 // --- AQUÍ LA CORRECCIÓN CLAVE ---
