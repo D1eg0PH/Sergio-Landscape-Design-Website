@@ -89,12 +89,27 @@ export default function Navbar() {
               </div>
             )}
 
-            <button
-              onClick={() => setLang(lang === 'en' ? 'es' : 'en')}
-              className="bg-gray-400 px-3 py-2 rounded-full text-[10px] font-bold border border-gray-400 hover:bg-gray-500 transition-colors"
-            >
-              {lang === 'en' ? 'EN' : 'ES'}
-            </button>
+            <div className="flex items-center bg-gray-100 rounded-full p-1">
+              <button
+                onClick={() => setLang('es')}
+                className={`px-3 py-1 rounded-full text-sm transition ${
+                  lang === 'es'
+                    ? 'bg-white shadow font-semibold'
+                    : 'text-gray-500'
+                }`}
+              >
+                ES
+              </button>
+
+              <button
+                onClick={() => setLang('en')}
+                className={`px-3 py-1 rounded-full text-sm transition ${
+                  lang === 'en'
+                    ? 'bg-white shadow font-semibold'
+                    : 'text-gray-500'
+                }`} >EN
+              </button>
+            </div>
           </div>
         </div>
       </div>
