@@ -42,7 +42,7 @@ export default function Navbar() {
             </Link>
           </div>
 
-          <div className="h-6 .w-[1px] bg-gray-200 hidden md:block"></div>
+          <div className="h-6 .w-[1px] bg-gray-400 hidden md:block"></div>
 
           <div className="flex items-center gap-3">
             {!isSignedIn && (
@@ -91,7 +91,7 @@ export default function Navbar() {
 
             <button
               onClick={() => setLang(lang === 'en' ? 'es' : 'en')}
-              className="bg-gray-300 px-3 py-2 rounded-full text-[10px] font-bold border border-gray-400 hover:bg-gray-500 transition-colors"
+              className="bg-gray-400 px-3 py-2 rounded-full text-[10px] font-bold border border-gray-400 hover:bg-gray-500 transition-colors"
             >
               {lang === 'en' ? 'EN' : 'ES'}
             </button>

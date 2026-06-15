@@ -258,7 +258,7 @@ const isDayFullyBooked = (date: Date) => {
       </nav>
 
       <main className="max-w-6xl mx-auto px-6 py-8">
-        <header className="bg-emerald-900 .rounded-[2rem] p-10 text-white mb-8 shadow-xl">
+        <header className="bg-emerald-900 rounded-[2.5rem] p-10 text-white mb-8 shadow-xl">
           <h1 className="text-3xl font-black uppercase italic tracking-tighter">{t.title}</h1>
           <p className="text-emerald-300 text-[10px] uppercase tracking-[0.2em]">{t.subtitle}</p>
         </header>

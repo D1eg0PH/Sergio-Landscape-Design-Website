@@ -34,7 +34,7 @@ export default function Footer() {
   const t = content[lang as 'en' | 'es'] || content.es;
 
   return (
-    <footer className="bg-emerald-950 text-white pt-16 pb-8 px-6 font-sans border-t border-emerald-900/50">
+    <footer className="bg-emerald-900 text-white pt-16 pb-8 px-6 font-sans border-t border-emerald-900/50">
       <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
         
         {/* COLUMNA 1: LOGO Y DESCRIPCIÓN */}
