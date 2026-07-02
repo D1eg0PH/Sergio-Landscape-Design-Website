@@ -4,8 +4,23 @@ import Link from 'next/link';
 import { useLanguage } from '@/context/LanguajeContext';
 import { useState } from 'react';
 
+import FireworksBackground from "@/components/Fireworks";
+import IndependenceBanner from "@/components/IndependenceBanner";
+
 export default function SergioLandscapeHome() {
   
+  const today = new Date();
+  const month = today.getMonth() + 1; // Enero = 1
+  const day = today.getDate();
+
+  const showIndependenceBanner =
+    month === 7 && day >= 1 && day <= 6;
+
+
+
+
+
+
   const { lang } = useLanguage();
   const [selectedImg, setSelectedImg] = useState<string | null>(null);
 
@@ -53,10 +68,16 @@ export default function SergioLandscapeHome() {
   const t = content[lang as 'en' | 'es'];
 
   return (
-    <div className="font-sans text-gray-900 bg-stone-50">
-      
+    
+    <div  className=" font-sans text-gray-900 bg-stone-50">
+
+      {showIndependenceBanner && <FireworksBackground />}
+
+      {showIndependenceBanner && (<IndependenceBanner />)}
+        
       {/* HERO SECTION */}
       <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 px-6 ">
+
         <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
           <div>
             <span className="inline-block px-4 py-1 bg-emerald-100 text-emerald-700 rounded-full text-sm font-bold mb-4">

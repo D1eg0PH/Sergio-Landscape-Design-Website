@@ -26,61 +26,22 @@ body {
 }
 
 
-.firework {
-  position: absolute;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: white;
-  box-shadow:
-    0 -40px #fff,
-    0 40px #fff,
-    -40px 0 #fff,
-    40px 0 #fff,
-    28px 28px #dc2626,
-    -28px -28px #2563eb,
-    28px -28px #fff,
-    -28px 28px #dc2626;
-  animation: explode 4s infinite ease-out;
-  opacity: 0;
-}
 
-.firework1 {
-  top: 20%;
-  left: 20%;
-  animation-delay: 0s;
-}
-
-.firework2 {
-  top: 35%;
-  right: 20%;
-  animation-delay: 1.5s;
-}
-
-.firework3 {
-  top: 15%;
-  left: 60%;
-  animation-delay: 3s;
-}
-
-@keyframes explode {
+@keyframes ribbonWave {
   0% {
-    transform: scale(0);
-    opacity: 0;
+    transform: translateY(-50%) rotate(0deg);
   }
 
-  15% {
-    opacity: .8;
-    transform: scale(1);
-  }
-
-  35% {
-    opacity: .4;
-    transform: scale(1.4);
+  50% {
+    transform: translateY(calc(-50% - 4px)) rotate(1deg);
   }
 
   100% {
-    opacity: 0;
-    transform: scale(2);
+    transform: translateY(-50%) rotate(0deg);
   }
+}
+
+.ribbon-wave {
+  animation: ribbonWave 10s ease-in-out infinite;
+  transform-origin: center;
 }
