@@ -20,7 +20,6 @@ export default function SergioLandscapeHome() {
 
 
 
-
   const { lang } = useLanguage();
   const [selectedImg, setSelectedImg] = useState<string | null>(null);
 

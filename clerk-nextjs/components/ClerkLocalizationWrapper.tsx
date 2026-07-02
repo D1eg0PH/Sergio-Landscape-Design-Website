@@ -15,7 +15,6 @@ export default function ClerkLocalizationWrapper({ children }: { children: React
       appearance={{
         variables: {
           colorPrimary: '#065f46',
-          colorTextOnPrimaryBackground: 'white',
         },
         elements: {
           card: "shadow-2xl border-2 border-emerald-50 rounded-[2rem]",
