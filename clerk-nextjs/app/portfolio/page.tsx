@@ -12,6 +12,9 @@ const photos = [
   '/portfolio/trabajo4.jpeg', '/portfolio/trabajo5.jpeg', '/portfolio/trabajo6.jpeg',
   '/portfolio/trabajo7.jpeg','/portfolio/trabajo8.jpeg','/portfolio/trabajo9.jpeg',
   '/portfolio/trabajo10.jpeg','/portfolio/trabajo11.jpeg','/portfolio/trabajo12.jpeg',
+  '/portfolio/trabajo13.jpg','/portfolio/trabajo14.jpg','/portfolio/trabajo15.jpg',
+  '/portfolio/trabajo16.jpg','/portfolio/trabajo17.jpg','/portfolio/trabajo18.jpg'
+
 ];
 
 export default function PortfolioPage() {
@@ -80,8 +83,7 @@ export default function PortfolioPage() {
         {/* Galería Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {photos.map((path, index) => (
-            <div 
-              key={index} 
+            <div key={index} 
               // 4. Añadimos el evento onClick para abrir el modal
               onClick={() => setSelectedImage(path)}
               className="group relative h-80 w-full overflow-hidden rounded-[2.5rem] bg-white shadow-xl border-8 border-white hover:border-emerald-100 transition-all duration-300 cursor-pointer"
@@ -106,13 +108,13 @@ export default function PortfolioPage() {
       {selectedImage && (
         // Overlay oscuro de fondo
         <div 
-          className="fixed inset-0 .z-[100] bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 md:p-10 cursor-zoom-out"
+          className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 md:p-10 cursor-zoom-out"
           onClick={() => setSelectedImage(null)} // Cerrar al hacer clic fuera
         >
           {/* Botón Cerrar */}
           <button 
             onClick={() => setSelectedImage(null)} 
-            className="absolute top-6 right-6 .z-[110] bg-white text-black p-3 rounded-full hover:bg-emerald-100 transition-colors shadow-lg"
+            className="absolute top-6 right-6 z-[110] bg-white text-black p-3 rounded-full hover:bg-emerald-100 transition-colors shadow-lg"
             title={text.close}
           >
             <X size={24} />
