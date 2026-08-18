@@ -154,11 +154,11 @@ export default function SergioLandscapeHome() {
             <p className="text-xl text-emerald-600 font-medium italic">{t.imgDesc}</p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-4 auto-rows-[200px]">
-            {['garden1.webp', 'garden2.webp', 'garden5.webp', 'garden3.webp'].map((img, idx) => (
+          <div className="grid grid-cols-2 md:grid-cols- lg:grid-cols-2 gap-4 auto-rows-[200px]">
+            {['garden1.webp', 'garden2.webp', 'garden3.webp'].map((img, idx) => (
               <div 
                 key={idx} onClick={() => setSelectedImg(`/${img}`)} 
-                className={`rounded-3xl overflow-hidden group relative cursor-pointer shadow-lg ${idx === 0 ? 'col-span-2 row-span-2' : ''} ${idx === 3 ? 'col-span-2' : ''}`}
+                className={`rounded-3xl overflow-hidden group relative cursor-pointer shadow-lg ${idx === 0 ? 'col-span-1 row-span-2' : ''} ${idx === 3 ? 'col-span-1' : ''}`}
               >
                 <img src={`/${img}`} alt={`Project ${idx}`} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                 <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center">
