@@ -16,7 +16,9 @@ const photos = [
   '/portfolio/trabajo16.jpg','/portfolio/trabajo17.jpg','/portfolio/trabajo18.jpg',
   '/portfolio/trabajo19.jpeg', '/portfolio/trabajo20.jpeg', '/portfolio/trabajo21.jpeg',
    '/portfolio/trabajo22.jpeg','/portfolio/trabajo23.jpeg','/portfolio/trabajo24.jpeg',
-   '/portfolio/trabajo25.jpeg','/portfolio/trabajo26.jpeg','/portfolio/trabajo27.jpeg'
+   '/portfolio/trabajo25.jpeg','/portfolio/trabajo26.jpeg','/portfolio/trabajo27.jpeg',
+   '/portfolio/trabajo28.jpeg','/portfolio/trabajo29.jpg','/portfolio/trabajo30.jpg',
+   '/portfolio/trabajo31.jpg','/portfolio/trabajo32.jpg','/portfolio/trabajo34.jpg'
 
 ];
 
