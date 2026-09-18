@@ -1,47 +1,77 @@
 import { neon } from '@neondatabase/serverless';
 import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
+import { requireAdmin } from '@/lib/admin';
+import {
+  badRequest,
+  cleanLine,
+  cleanText,
+  escapeHtml,
+  isEmail,
+  isUuid,
+  rateLimit,
+  readJson,
+  serverError,
+  tooManyRequests,
+} from '@/lib/security';
 
-// 1. Configuración de conexión (Igual que en Plants y Appointments)
 const getSql = () => {
   const connectionString = (process.env.DATABASE_URL || "").split('&')[0].trim();
   return neon(connectionString);
 };
 
-// 2. OBTENER MENSAJES (GET)
-export async function GET() {
-  try {
-    const sql = getSql();
-    // Seleccionamos los mensajes ordenados por fecha de creación
-    const data = await sql`SELECT * FROM contact_messages ORDER BY created_at DESC`;
-    return NextResponse.json(data);
-  } catch (error: any) {
-    console.error("Error al obtener mensajes:", error.message);
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
-}
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-export async function POST(req: Request) {
+// ---------------------------------------------------------------------------
+// GET: leer mensajes (SOLO ADMIN)
+// ---------------------------------------------------------------------------
+export async function GET() {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   try {
-    const { name, email, message } = await req.json();
+    const sql = getSql();
+    const data = await sql`SELECT * FROM contact_messages ORDER BY created_at DESC`;
+    return NextResponse.json(data);
+  } catch (error) {
+    return serverError('contact:GET', error);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// POST: enviar mensaje desde el formulario (público)
+// ---------------------------------------------------------------------------
+export async function POST(req: Request) {
+  if (!rateLimit(req, 'contact')) return tooManyRequests();
+
+  try {
+    const body = await readJson(req);
+    if (!body) return badRequest('Solicitud inválida / Invalid request');
+
+    const name = cleanLine(body.name);
+    const email = cleanLine(body.email);
+    const message = cleanText(body.message);
 
     if (!name || !email || !message) {
-      return NextResponse.json({ error: "Todos los campos son obligatorios" }, { status: 400 });
+      return badRequest('Todos los campos son obligatorios / All fields are required');
+    }
+    if (name.length > 100 || message.length > 3000) {
+      return badRequest('Texto demasiado largo / Text too long');
+    }
+    if (!isEmail(email)) {
+      return badRequest('Correo inválido / Invalid email');
     }
 
     const sql = getSql();
-    
-    const result = await sql`
+    await sql`
       INSERT INTO contact_messages (name, email, message)
       VALUES (${name}, ${email}, ${message})
-      RETURNING *
     `;
 
-    // 2. NOTIFICACIÓN DE NUEVO MENSAJE
+    // Notificación por correo (todo lo que viene del usuario va escapado)
     try {
       await resend.emails.send({
-        from: 'Sergio Landscape <notifications@sergiolandscape.com>', // Usa tu dominio verificado
+        from: 'Sergio Landscape <notifications@sergiolandscape.com>',
         to: ['info@sergiolandscape.com','diegoarmandopehu@gmail.com','sergiolandscapedesign@outlook.com'],
         subject: `✉️ NUEVO MENSAJE: ${name}`,
         html: `
@@ -49,16 +79,16 @@ export async function POST(req: Request) {
             <h2 style="color: #065f46; text-transform: uppercase; letter-spacing: -0.05em; font-style: italic;">Consulta de Contacto</h2>
             <p style="color: #64748b; font-size: 14px;">Has recibido un nuevo mensaje desde el formulario de contacto del sitio web.</p>
             <hr style="border: 0; border-top: 1px solid #f1f5f9; margin: 20px 0;">
-            
+
             <div style="background-color: #f8fafc; padding: 20px; border-radius: 16px;">
-              <p style="margin: 0 0 10px 0;"><strong>Nombre:</strong> ${name}</p>
-              <p style="margin: 0 0 10px 0;"><strong>Email:</strong> ${email}</p>
+              <p style="margin: 0 0 10px 0;"><strong>Nombre:</strong> ${escapeHtml(name)}</p>
+              <p style="margin: 0 0 10px 0;"><strong>Email:</strong> ${escapeHtml(email)}</p>
               <p style="margin: 20px 0 5px 0; font-weight: bold; color: #065f46;">Mensaje:</p>
-              <p style="margin: 0; line-height: 1.6; color: #334155;">"${message}"</p>
+              <p style="margin: 0; line-height: 1.6; color: #334155;">${escapeHtml(message).replace(/\n/g, '<br>')}</p>
             </div>
 
             <div style="margin-top: 30px; text-align: center;">
-              <a href="mailto:${email}" style="background-color: #059669; color: white; padding: 12px 25px; text-decoration: none; border-radius: 12px; font-weight: bold; font-size: 14px;">Responder al Cliente</a>
+              <a href="mailto:${escapeHtml(email)}" style="background-color: #059669; color: white; padding: 12px 25px; text-decoration: none; border-radius: 12px; font-weight: bold; font-size: 14px;">Responder al Cliente</a>
             </div>
           </div>
         `
@@ -67,61 +97,27 @@ export async function POST(req: Request) {
       console.error("Error enviando correo de contacto:", mailError);
     }
 
-    return NextResponse.json(result[0], { status: 201 });
-  } catch (error: any) {
-    console.error("Error al insertar mensaje:", error.message);
-    return NextResponse.json({ 
-      error: "Error al guardar el mensaje", 
-      details: error.message 
-    }, { status: 500 });
+    return NextResponse.json({ success: true }, { status: 201 });
+  } catch (error) {
+    return serverError('contact:POST', error);
   }
 }
 
-/*
-export async function POST(req: Request) {
-  try {
-    const { name, email, message } = await req.json();
-
-    // Validación básica
-    if (!name || !email || !message) {
-      return NextResponse.json({ error: "Todos los campos son obligatorios" }, { status: 400 });
-    }
-
-    const sql = getSql();
-    
-    // El ID se genera solo en Neon porque es gen_random_uuid()
-    const result = await sql`
-      INSERT INTO contact_messages (name, email, message)
-      VALUES (${name}, ${email}, ${message})
-      RETURNING *
-    `;
-
-    return NextResponse.json(result[0], { status: 201 });
-  } catch (error: any) {
-    console.error("Error al insertar mensaje:", error.message);
-    return NextResponse.json({ 
-      error: "Error al guardar el mensaje", 
-      details: error.message 
-    }, { status: 500 });
-  }
-}
-
-*/
-
-// 3. BORRAR MENSAJE (DELETE)
+// ---------------------------------------------------------------------------
+// DELETE: borrar mensaje (SOLO ADMIN)
+// ---------------------------------------------------------------------------
 export async function DELETE(req: Request) {
-  try {
-    const { searchParams } = new URL(req.url);
-    const id = searchParams.get('id');
+  const denied = await requireAdmin();
+  if (denied) return denied;
 
-    if (!id) return NextResponse.json({ error: "ID requerido" }, { status: 400 });
+  try {
+    const id = new URL(req.url).searchParams.get('id');
+    if (!isUuid(id)) return badRequest('ID inválido');
 
     const sql = getSql();
-    
-    // ELIMINAMOS BigInt(id) porque aquí el ID es un UUID (texto)
     const result = await sql`
-      DELETE FROM contact_messages 
-      WHERE id = ${id} 
+      DELETE FROM contact_messages
+      WHERE id = ${id}
       RETURNING id
     `;
 
@@ -130,9 +126,7 @@ export async function DELETE(req: Request) {
     }
 
     return NextResponse.json({ message: "Mensaje eliminado" });
-  } catch (error: any) {
-    console.error("Error al eliminar mensaje:", error.message);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error) {
+    return serverError('contact:DELETE', error);
   }
-  
 }
