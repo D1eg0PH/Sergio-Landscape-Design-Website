@@ -1,108 +1,115 @@
 import { neon } from '@neondatabase/serverless';
 import { NextResponse } from 'next/server';
 import { put } from '@vercel/blob';
+import { requireAdmin } from '@/lib/admin';
+import { badRequest, cleanLine, parseNumericId, serverError } from '@/lib/security';
 
-// Configuración de conexión a Neon
 const getSql = () => {
   const connectionString = (process.env.DATABASE_URL || "").split('&')[0].trim();
   return neon(connectionString);
 };
 
+// Vercel limita el cuerpo de una función a ~4.5 MB, así que 4 MB es el máximo real
+const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
+const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+
+// ---------------------------------------------------------------------------
+// POST: agregar planta al catálogo (SOLO ADMIN)
+// ---------------------------------------------------------------------------
 export async function POST(req: Request) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   try {
     const formData = await req.formData();
-    const file = formData.get('file') as File | null;
+    const file = formData.get('file');
 
-    // 1. Validación de imagen (Único campo obligatorio)
-    if (!file || file.size === 0) {
-      return NextResponse.json({ error: "La imagen es obligatoria" }, { status: 400 });
+    // 1. Validación de imagen (único campo obligatorio)
+    if (!(file instanceof File) || file.size === 0) {
+      return badRequest("La imagen es obligatoria");
+    }
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+      return badRequest("Formato no permitido. Usa JPG, PNG o WebP");
+    }
+    if (file.size > MAX_IMAGE_BYTES) {
+      return badRequest("La imagen pesa más de 4 MB");
     }
 
     // Campos opcionales
-    const name_en = (formData.get('name_en') as string)?.trim() || "";
-    const name_es = (formData.get('name_es') as string)?.trim() || "";
-    const care_level = (formData.get('care_level') as string) || "Easy";
-    const category = (formData.get('category') as string)?.trim() || "";
+    const name_en = cleanLine(formData.get('name_en'));
+    const name_es = cleanLine(formData.get('name_es'));
+    const care_level = cleanLine(formData.get('care_level')) || "Easy";
+    const category = cleanLine(formData.get('category'));
 
-    // 2. Intento de subida a Vercel Blob con diagnóstico
+    if (name_en.length > 100 || name_es.length > 100 || category.length > 60 || care_level.length > 30) {
+      return badRequest("Texto demasiado largo");
+    }
+
+    // 2. Subida a Vercel Blob (nombre de archivo saneado)
+    if (!process.env.BLOB_READ_WRITE_TOKEN) {
+      console.error("Falta la variable BLOB_READ_WRITE_TOKEN en el servidor");
+      return NextResponse.json({ error: "Storage no configurado" }, { status: 500 });
+    }
+
+    const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_').slice(-80) || 'plant.jpg';
     let finalImageUrl = "";
     try {
-      if (!process.env.BLOB_READ_WRITE_TOKEN) {
-        throw new Error("Falta la variable BLOB_READ_WRITE_TOKEN en el servidor");
-      }
-
-      const blob = await put(file.name, file, { 
+      const blob = await put(`plants/${safeName}`, file, {
         access: 'public',
-        addRandomSuffix: true 
+        addRandomSuffix: true,
+        contentType: file.type,
       });
-      
       finalImageUrl = blob.url;
-      console.log("✅ Imagen subida con éxito:", finalImageUrl);
-
-    } catch (blobError: any) {
-      console.error("❌ ERROR DETALLADO DE VERCEL BLOB:", blobError);
-      return NextResponse.json({ 
-        error: "Failed to upload image to storage", 
-        details: blobError.message 
-      }, { status: 500 });
+    } catch (blobError) {
+      return serverError('plants:blob', blobError);
     }
 
-    // 3. Inserción en la base de datos Neon
-    try {
-      const sql = getSql();
-      const result = await sql`
-        INSERT INTO plants_catalog (name_en, name_es, care_level, image_url, category) 
-        VALUES (${name_en}, ${name_es}, ${care_level}, ${finalImageUrl}, ${category})
-        RETURNING *
-      `;
-      return NextResponse.json(result[0], { status: 201 });
-    } catch (dbError: any) {
-      console.error("❌ ERROR DE BASE DE DATOS:", dbError.message);
-      return NextResponse.json({ 
-        error: "Error al guardar en base de datos", 
-        details: dbError.message 
-      }, { status: 500 });
-    }
-
-  } catch (error: any) {
-    console.error("❌ ERROR GENERAL:", error.message);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    // 3. Inserción en Neon
+    const sql = getSql();
+    const result = await sql`
+      INSERT INTO plants_catalog (name_en, name_es, care_level, image_url, category)
+      VALUES (${name_en}, ${name_es}, ${care_level}, ${finalImageUrl}, ${category})
+      RETURNING *
+    `;
+    return NextResponse.json(result[0], { status: 201 });
+  } catch (error) {
+    return serverError('plants:POST', error);
   }
 }
 
-
-// GET: Ahora solo trae las plantas activas
+// ---------------------------------------------------------------------------
+// GET: plantas activas (requiere sesión por proxy.ts)
+// ---------------------------------------------------------------------------
 export async function GET() {
   try {
     const sql = getSql();
-    // Filtramos para que Sergio solo vea lo que sigue a la venta
     const data = await sql`
-      SELECT * FROM plants_catalog 
-      WHERE is_active = TRUE 
+      SELECT * FROM plants_catalog
+      WHERE is_active = TRUE
       ORDER BY id DESC
     `;
     return NextResponse.json(data);
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error) {
+    return serverError('plants:GET', error);
   }
 }
 
-// DELETE: Ahora es un "Soft Delete" (Baja lógica)
+// ---------------------------------------------------------------------------
+// DELETE: baja lógica de una planta (SOLO ADMIN)
+// ---------------------------------------------------------------------------
 export async function DELETE(req: Request) {
-  try {
-    const { searchParams } = new URL(req.url);
-    const id = searchParams.get('id');
+  const denied = await requireAdmin();
+  if (denied) return denied;
 
-    if (!id) return NextResponse.json({ error: "ID requerido" }, { status: 400 });
+  try {
+    const id = parseNumericId(new URL(req.url).searchParams.get('id'));
+    if (!id) return badRequest("ID inválido");
 
     const sql = getSql();
-    const numericId = BigInt(id);
-
-    // En lugar de DELETE, hacemos UPDATE
     const result = await sql`
-      UPDATE plants_catalog 
-      SET is_active = FALSE 
-      WHERE id = ${numericId}
+      UPDATE plants_catalog
+      SET is_active = FALSE
+      WHERE id = ${BigInt(id)}
       RETURNING *
     `;
 
@@ -111,55 +118,7 @@ export async function DELETE(req: Request) {
     }
 
     return NextResponse.json({ message: "Planta archivada con éxito" });
-  } catch (error: any) {
-    console.error("Error al archivar:", error.message);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error) {
+    return serverError('plants:DELETE', error);
   }
 }
-
-
-
-/*
-// GET y DELETE simplificados
-export async function GET() {
-  try {
-    const sql = getSql();
-    const data = await sql`SELECT * FROM plants_catalog ORDER BY id DESC`;
-    return NextResponse.json(data);
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
-}
-
-export async function DELETE(req: Request) {
-  try {
-    const { searchParams } = new URL(req.url);
-    const id = searchParams.get('id');
-
-    if (!id) {
-      return NextResponse.json({ error: "ID requerido" }, { status: 400 });
-    }
-
-    const sql = getSql();
-    
-    // Convertimos a BigInt para asegurar que Neon encuentre el registro
-    const numericId = BigInt(id);
-
-    const result = await sql`
-      DELETE FROM plants_catalog 
-      WHERE id = ${numericId}
-      RETURNING *
-    `;
-
-    if (result.length === 0) {
-      return NextResponse.json({ error: "No se encontró la planta en la base de datos" }, { status: 404 });
-    }
-
-    return NextResponse.json({ message: "Eliminado con éxito", deleted: result[0] });
-  } catch (error: any) {
-    console.error("Error en DELETE:", error.message);
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
-}
-
-*/

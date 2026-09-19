@@ -1,36 +1,42 @@
 import { neon } from '@neondatabase/serverless';
 import { NextResponse, NextRequest } from 'next/server';
+import { requireAdmin } from '@/lib/admin';
+import {
+  badRequest,
+  isAllowedStatus,
+  parseNumericId,
+  readJson,
+  serverError,
+} from '@/lib/security';
 
 const getSql = () => {
   const connectionString = (process.env.DATABASE_URL || "").split('&')[0].trim();
   return neon(connectionString);
 };
 
-// Definimos la interfaz para que TypeScript sepa que params es una Promesa
+// params es una Promesa en Next.js 15/16
 interface RouteContext {
   params: Promise<{ id: string }>;
 }
 
-export async function PATCH(
-  request: NextRequest,
-  context: RouteContext // Cambiamos la estructura aquí
-) {
-  try {
-    // 1. IMPORTANTE: Usar await para obtener los params
-    const { id } = await context.params;
-    const { status } = await request.json();
+// PATCH: cambiar estado de una cita (SOLO ADMIN)
+export async function PATCH(request: NextRequest, context: RouteContext) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
 
-    if (!id || id === 'undefined' || !status) {
-      return NextResponse.json({ error: "ID o Status faltante" }, { status: 400 });
-    }
+  try {
+    const { id: rawId } = await context.params;
+    const id = parseNumericId(rawId);
+    if (!id) return badRequest('ID inválido');
+
+    const body = await readJson(request);
+    if (!body || !isAllowedStatus(body.status)) return badRequest('Estado inválido');
 
     const sql = getSql();
-    const numericId = BigInt(id);
-
     const result = await sql`
-      UPDATE appointments 
-      SET status = ${status} 
-      WHERE id = ${numericId}
+      UPDATE appointments
+      SET status = ${body.status}
+      WHERE id = ${BigInt(id)}
       RETURNING *
     `;
 
@@ -39,27 +45,26 @@ export async function PATCH(
     }
 
     return NextResponse.json(result[0]);
-  } catch (error: any) {
-    console.error("Error en PATCH:", error.message);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error) {
+    return serverError('appointments/[id]:PATCH', error);
   }
 }
 
-export async function DELETE(
-  request: NextRequest,
-  context: RouteContext // Cambiamos la estructura aquí también
-) {
-  try {
-    // 2. IMPORTANTE: Usar await para obtener el id
-    const { id } = await context.params;
-    
-    const sql = getSql();
-    const numericId = BigInt(id);
+// DELETE: borrar una cita (SOLO ADMIN)
+export async function DELETE(request: NextRequest, context: RouteContext) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
 
-    await sql`DELETE FROM appointments WHERE id = ${numericId}`;
+  try {
+    const { id: rawId } = await context.params;
+    const id = parseNumericId(rawId);
+    if (!id) return badRequest('ID inválido');
+
+    const sql = getSql();
+    await sql`DELETE FROM appointments WHERE id = ${BigInt(id)}`;
 
     return NextResponse.json({ message: "Registro eliminado" });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error) {
+    return serverError('appointments/[id]:DELETE', error);
   }
 }
